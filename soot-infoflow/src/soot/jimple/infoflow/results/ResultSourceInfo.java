@@ -42,6 +42,10 @@ public class ResultSourceInfo extends AbstractResultSourceSinkInfo {
 		return this.path;
 	}
 
+	public int getPathLength() {
+		return (this.path == null) ? 0 : this.path.length;
+	}
+
 	public AccessPath[] getPathAccessPaths() {
 		return this.pathAPs;
 	}

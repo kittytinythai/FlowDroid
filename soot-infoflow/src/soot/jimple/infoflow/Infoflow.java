@@ -81,6 +81,7 @@ import soot.jimple.infoflow.results.InfoflowPerformanceData;
 import soot.jimple.infoflow.results.InfoflowResults;
 import soot.jimple.infoflow.results.ResultSinkInfo;
 import soot.jimple.infoflow.results.ResultSourceInfo;
+import soot.jimple.infoflow.results.DataFlowResult;
 import soot.jimple.infoflow.solver.IInfoflowSolver;
 import soot.jimple.infoflow.solver.PredecessorShorteningMode;
 import soot.jimple.infoflow.solver.SolverPeerGroup;
@@ -745,17 +746,18 @@ public class Infoflow extends AbstractInfoflow {
 		if (results == null || results.isEmpty())
 			logger.warn("No results found.");
 		else if (logger.isInfoEnabled()) {
-			for (ResultSinkInfo sink : results.getResults().keySet()) {
-				logger.info("The sink {} in method {} was called with values from the following sources:", sink,
-						iCfg.getMethodOf(sink.getStmt()).getSignature());
-				for (ResultSourceInfo source : results.getResults().get(sink)) {
-					logger.info("- {} in method {}", source, iCfg.getMethodOf(source.getStmt()).getSignature());
-					if (source.getPath() != null) {
-						logger.info("\ton Path: ");
-						for (Unit p : source.getPath()) {
-							logger.info("\t -> " + iCfg.getMethodOf(p));
-							logger.info("\t\t -> " + p);
-						}
+			for (DataFlowResult dataflow : results.getPrioritizedResults()) {
+				ResultSinkInfo sink = dataflow.getSink();
+				ResultSourceInfo source = dataflow.getSource();
+
+				logger.info("The sink {} in method {} was called with values from the following source (length {}):",
+						sink, iCfg.getMethodOf(sink.getStmt()).getSignature(), source.getPathLength());
+				logger.info("- {} in method {}", source, iCfg.getMethodOf(source.getStmt()).getSignature());
+				if (source.getPath() != null) {
+					logger.info("\ton Path: ");
+					for (Unit p : source.getPath()) {
+						logger.info("\t -> " + iCfg.getMethodOf(p));
+						logger.info("\t\t -> " + p);
 					}
 				}
 			}

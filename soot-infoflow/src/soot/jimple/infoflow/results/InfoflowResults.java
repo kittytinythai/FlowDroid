@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Comparator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -584,4 +585,16 @@ public class InfoflowResults {
 		return true;
 	}
 
+	public List<DataFlowResult> getPrioritizedResults() {
+		List<DataFlowResult> prioritizedResults = new ArrayList<>();
+		for (ResultSinkInfo sink : results.keySet()) {
+			for (ResultSourceInfo source : results.get(sink)) {
+				prioritizedResults.add(new DataFlowResult(source, sink));
+			}
+		}
+
+		// Sort by length of taint paths
+		Collections.sort(prioritizedResults, Comparator.comparingInt(o -> o.getSource().getPathLength()));
+		return prioritizedResults;
+	}
 }
