@@ -60,7 +60,7 @@ public class InfoflowResultsReader {
 			Stack<State> stateStack = new Stack<>();
 			stateStack.push(State.init);
 
-			while (reader.hasNext()) {
+			while (reader.hasNext() && !stateStack.empty()) {
 				// Read the next tag
 				reader.next();
 				if (!reader.hasName())
