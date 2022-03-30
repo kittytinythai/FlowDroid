@@ -28,6 +28,7 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.data.Abstraction;
 import soot.jimple.infoflow.data.AccessPath;
+import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
 import soot.util.ConcurrentHashMultiMap;
 import soot.util.MultiMap;
@@ -585,16 +586,16 @@ public class InfoflowResults {
 		return true;
 	}
 
-	public List<DataFlowResult> getPrioritizedResults() {
+	public List<DataFlowResult> getPrioritizedResults(IInfoflowCFG iCfg) {
 		List<DataFlowResult> prioritizedResults = new ArrayList<>();
 		for (ResultSinkInfo sink : results.keySet()) {
 			for (ResultSourceInfo source : results.get(sink)) {
-				prioritizedResults.add(new DataFlowResult(source, sink));
+				prioritizedResults.add(new DataFlowResult(source, sink, iCfg));
 			}
 		}
 
 		// Sort by length of taint paths
-		Collections.sort(prioritizedResults, Comparator.comparingInt(o -> o.getSource().getPathLength()));
+		Collections.sort(prioritizedResults, Comparator.comparingInt(DataFlowResult::getPriorityScore));
 		return prioritizedResults;
 	}
 }

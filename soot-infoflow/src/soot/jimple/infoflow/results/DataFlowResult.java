@@ -1,7 +1,14 @@
 package soot.jimple.infoflow.results;
 
+import soot.SootClass;
+import soot.SootMethod;
+import soot.Unit;
+import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkCategory;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Data class for having the source and sink of a single flow together in one
@@ -14,10 +21,18 @@ public class DataFlowResult {
 
 	private final ResultSourceInfo source;
 	private final ResultSinkInfo sink;
+	private final int priorityScore;
 
 	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink) {
 		this.source = source;
 		this.sink = sink;
+		this.priorityScore = Integer.MAX_VALUE;
+	}
+
+	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink, IInfoflowCFG iCfg) {
+		this.source = source;
+		this.sink = sink;
+		this.priorityScore = computePriorityScore(iCfg);
 	}
 
 	public ResultSourceInfo getSource() {
@@ -26,6 +41,30 @@ public class DataFlowResult {
 
 	public ResultSinkInfo getSink() {
 		return sink;
+	}
+
+	public int getPriorityScore() {
+		return priorityScore;
+	}
+
+	private int computePriorityScore(IInfoflowCFG iCfg) {
+		int score;
+		Set<String> methods = new HashSet<>();
+		Set<String> classes = new HashSet<>();
+
+		for (Unit p : source.getPath()) {
+			SootMethod method = iCfg.getMethodOf(p);
+			methods.add(method.getName());
+			classes.add(method.getDeclaringClass().getName());
+		}
+
+		int pathLength = source.getPathLength();
+		int numMethods = methods.size();
+		int numClasses = classes.size();
+
+		score = pathLength + numMethods + numClasses;
+
+		return score;
 	}
 
 	/**
