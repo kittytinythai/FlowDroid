@@ -746,12 +746,13 @@ public class Infoflow extends AbstractInfoflow {
 		if (results == null || results.isEmpty())
 			logger.warn("No results found.");
 		else if (logger.isInfoEnabled()) {
+			int index = 0;
 			for (DataFlowResult dataflow : results.getPrioritizedResults(iCfg)) {
 				ResultSinkInfo sink = dataflow.getSink();
 				ResultSourceInfo source = dataflow.getSource();
 
-				logger.info("The sink {} in method {} was called with values from the following source (priority score {}):",
-						sink, iCfg.getMethodOf(sink.getStmt()).getSignature(), dataflow.getPriorityScore());
+				logger.info("{}) The sink {} in method {} was called with values from the following source (priority score {}):",
+						(index++), sink, iCfg.getMethodOf(sink.getStmt()).getSignature(), dataflow.getPriorityScore());
 				logger.info("- {} in method {}", source, iCfg.getMethodOf(source.getStmt()).getSignature());
 				if (source.getPath() != null) {
 					logger.info("\ton Path: ");

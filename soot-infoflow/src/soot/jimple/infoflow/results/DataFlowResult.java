@@ -3,6 +3,9 @@ package soot.jimple.infoflow.results;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.IfStmt;
+import soot.jimple.LookupSwitchStmt;
+import soot.jimple.TableSwitchStmt;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkCategory;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
@@ -26,6 +29,7 @@ public class DataFlowResult {
 	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink) {
 		this.source = source;
 		this.sink = sink;
+		// if a dataflow result doesn't have a score, then it should not get the best score
 		this.priorityScore = Integer.MAX_VALUE;
 	}
 
@@ -51,18 +55,26 @@ public class DataFlowResult {
 		int score;
 		Set<String> methods = new HashSet<>();
 		Set<String> classes = new HashSet<>();
+		int numConds = 0;
 
 		for (Unit p : source.getPath()) {
 			SootMethod method = iCfg.getMethodOf(p);
 			methods.add(method.getName());
 			classes.add(method.getDeclaringClass().getName());
+			if (p instanceof IfStmt || p instanceof LookupSwitchStmt || p instanceof TableSwitchStmt) {
+				numConds++;
+			}
 		}
 
 		int pathLength = source.getPathLength();
 		int numMethods = methods.size();
 		int numClasses = classes.size();
 
+		// do not include conditionals
 		score = pathLength + numMethods + numClasses;
+
+		// include conditionals
+		//score = pathLength + numMethods + numClasses + numConds;
 
 		return score;
 	}
