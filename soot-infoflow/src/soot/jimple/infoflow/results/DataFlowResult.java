@@ -1,6 +1,5 @@
 package soot.jimple.infoflow.results;
 
-import soot.SootClass;
 import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.IfStmt;
@@ -24,7 +23,7 @@ public class DataFlowResult {
 
 	private final ResultSourceInfo source;
 	private final ResultSinkInfo sink;
-	private final int priorityScore;
+	private final float priorityScore;
 
 	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink) {
 		this.source = source;
@@ -47,12 +46,12 @@ public class DataFlowResult {
 		return sink;
 	}
 
-	public int getPriorityScore() {
+	public float getPriorityScore() {
 		return priorityScore;
 	}
 
-	private int computePriorityScore(IInfoflowCFG iCfg) {
-		int score;
+	private float computePriorityScore(IInfoflowCFG iCfg) {
+		float score;
 		Set<String> methods = new HashSet<>();
 		Set<String> classes = new HashSet<>();
 		int numConds = 0;
@@ -71,10 +70,16 @@ public class DataFlowResult {
 		int numClasses = classes.size();
 
 		// do not include conditionals
-		score = pathLength + numMethods + numClasses;
+		// score = (float) pathLength + numMethods + numClasses;
 
 		// include conditionals
 		//score = pathLength + numMethods + numClasses + numConds;
+
+		// Normalize score based on path length
+		//score = (float) (numMethods + numClasses) / pathLength;
+
+		// include conditionals and normalize based on path length
+		score = (float) (numMethods + numClasses + numConds) / pathLength;
 
 		return score;
 	}

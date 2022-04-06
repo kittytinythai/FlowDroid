@@ -595,7 +595,7 @@ public class InfoflowResults {
 		}
 
 		// Sort by length of taint paths
-		Collections.sort(prioritizedResults, Comparator.comparingInt(DataFlowResult::getPriorityScore));
+		Collections.sort(prioritizedResults, Comparator.comparingDouble(DataFlowResult::getPriorityScore));
 		return prioritizedResults;
 	}
 }
