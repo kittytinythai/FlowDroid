@@ -751,8 +751,12 @@ public class Infoflow extends AbstractInfoflow {
 				ResultSinkInfo sink = dataflow.getSink();
 				ResultSourceInfo source = dataflow.getSource();
 
-				logger.info("{}) (priority score {}) The sink {} in method {} was called with values from the following source:",
-						(index++), dataflow.getPriorityScore(), sink, iCfg.getMethodOf(sink.getStmt()).getSignature());
+				logger.info("{}) priority score: {}, # unique classes: {}, # unique methods: {}, " +
+								"path length: {}, implicit factor: {}",
+						(index++), dataflow.getPriorityScore(), dataflow.getNumClasses(),
+						dataflow.getNumMethods(), dataflow.getPathLength(), dataflow.getImplicitFactor());
+				logger.info("The sink {} in method {} was called with values from the following source:",
+						sink, iCfg.getMethodOf(sink.getStmt()).getSignature());
 				logger.info("- {} in method {}", source, iCfg.getMethodOf(source.getStmt()).getSignature());
 				if (source.getPath() != null) {
 					logger.info("\ton Path: ");

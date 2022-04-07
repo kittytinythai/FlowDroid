@@ -25,7 +25,11 @@ public class DataFlowResult {
 
 	private final ResultSourceInfo source;
 	private final ResultSinkInfo sink;
-	private final float priorityScore;
+	private int pathLength;
+	private int numClasses;
+	private int numMethods;
+	private float implicitFactor;
+	private float priorityScore;
 
 	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink) {
 		this.source = source;
@@ -37,7 +41,7 @@ public class DataFlowResult {
 	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink, IInfoflowCFG iCfg) {
 		this.source = source;
 		this.sink = sink;
-		this.priorityScore = computePriorityScore(iCfg);
+		computeDataFlowInfo(iCfg);
 	}
 
 	public ResultSourceInfo getSource() {
@@ -52,6 +56,22 @@ public class DataFlowResult {
 		return priorityScore;
 	}
 
+	public int getPathLength() {
+		return pathLength;
+	}
+
+	public int getNumClasses() {
+		return numClasses;
+	}
+
+	public int getNumMethods() {
+		return numMethods;
+	}
+
+	public float getImplicitFactor() {
+		return implicitFactor;
+	}
+
 	// Returns the total number of conditional expressions in a conditional statement
 	private int countConditionExpr(Value value) {
 		if (value instanceof ConditionExpr) {
@@ -63,11 +83,10 @@ public class DataFlowResult {
 		}
 	}
 
-	private float computePriorityScore(IInfoflowCFG iCfg) {
-		float score;
+	// Compute the following fields: pathLength, numClasses, numMethods, implicitFactor and priorityScore
+	private void computeDataFlowInfo(IInfoflowCFG iCfg) {
 		Set<String> methods = new HashSet<>();
 		Set<String> classes = new HashSet<>();
-		float implicitFactor = 0;
 
 		for (Unit p : source.getPath()) {
 			SootMethod method = iCfg.getMethodOf(p);
@@ -82,23 +101,15 @@ public class DataFlowResult {
 			}
 		}
 
-		int pathLength = source.getPathLength();
-		int numMethods = methods.size();
-		int numClasses = classes.size();
-
-		// do not include conditionals
-		// score = (float) pathLength + numMethods + numClasses;
+		pathLength = source.getPathLength();
+		numMethods = methods.size();
+		numClasses = classes.size();
 
 		// include conditionals
-		//score = pathLength + numMethods + numClasses + numConds;
-
-		// Normalize score based on path length
-		//score = (float) (numMethods + numClasses) / pathLength;
+		priorityScore = pathLength + numMethods + numClasses + implicitFactor;
 
 		// include conditionals and normalize based on path length
-		score = (numMethods + numClasses + implicitFactor) / pathLength;
-
-		return score;
+		//priorityScore = (numMethods + numClasses + implicitFactor) / pathLength;
 	}
 
 	/**
