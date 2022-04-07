@@ -2,6 +2,8 @@ package soot.jimple.infoflow.results;
 
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
+import soot.jimple.ConditionExpr;
 import soot.jimple.IfStmt;
 import soot.jimple.LookupSwitchStmt;
 import soot.jimple.TableSwitchStmt;
@@ -50,18 +52,33 @@ public class DataFlowResult {
 		return priorityScore;
 	}
 
+	// Returns the total number of conditional expressions in a conditional statement
+	private int countConditionExpr(Value value) {
+		if (value instanceof ConditionExpr) {
+			Value op1 = ((ConditionExpr) value).getOp1();
+			Value op2 = ((ConditionExpr) value).getOp2();
+			return 1 + countConditionExpr(op1) + countConditionExpr(op2);
+		} else {
+			return 0;
+		}
+	}
+
 	private float computePriorityScore(IInfoflowCFG iCfg) {
 		float score;
 		Set<String> methods = new HashSet<>();
 		Set<String> classes = new HashSet<>();
-		int numConds = 0;
+		float implicitFactor = 0;
 
 		for (Unit p : source.getPath()) {
 			SootMethod method = iCfg.getMethodOf(p);
 			methods.add(method.getName());
 			classes.add(method.getDeclaringClass().getName());
-			if (p instanceof IfStmt || p instanceof LookupSwitchStmt || p instanceof TableSwitchStmt) {
-				numConds++;
+			if (p instanceof IfStmt) {
+				Value condition = ((IfStmt) p).getCondition();
+				int numConds = countConditionExpr(condition);
+				implicitFactor += (float) 1 / numConds;
+			} else if (p instanceof LookupSwitchStmt || p instanceof TableSwitchStmt) {
+				implicitFactor++;
 			}
 		}
 
@@ -79,7 +96,7 @@ public class DataFlowResult {
 		//score = (float) (numMethods + numClasses) / pathLength;
 
 		// include conditionals and normalize based on path length
-		score = (float) (numMethods + numClasses + numConds) / pathLength;
+		score = (numMethods + numClasses + implicitFactor) / pathLength;
 
 		return score;
 	}
