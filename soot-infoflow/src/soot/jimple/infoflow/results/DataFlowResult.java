@@ -105,11 +105,7 @@ public class DataFlowResult {
 		numMethods = methods.size();
 		numClasses = classes.size();
 
-		// include conditionals
 		priorityScore = pathLength + numMethods + numClasses + implicitFactor;
-
-		// include conditionals and normalize based on path length
-		//priorityScore = (numMethods + numClasses + implicitFactor) / pathLength;
 	}
 
 	/**
