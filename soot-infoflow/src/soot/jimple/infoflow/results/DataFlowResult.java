@@ -90,8 +90,8 @@ public class DataFlowResult {
 
 		for (Unit p : source.getPath()) {
 			SootMethod method = iCfg.getMethodOf(p);
-			methods.add(method.getName());
-			classes.add(method.getDeclaringClass().getName());
+			methods.add(method.toString());
+			classes.add(method.getDeclaringClass().toString());
 			if (p instanceof IfStmt) {
 				Value condition = ((IfStmt) p).getCondition();
 				int numConds = countConditionExpr(condition);
