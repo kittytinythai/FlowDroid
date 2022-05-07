@@ -11,6 +11,7 @@ import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkCategory;
 import soot.jimple.infoflow.sourcesSinks.definitions.ISourceSinkDefinition;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,18 +30,18 @@ public class DataFlowResult {
 	private int numClasses;
 	private int numMethods;
 	private float implicitFactor;
-	private float priorityScore;
+	private HashMap<String, Float> prioMetrics;
 
 	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink) {
 		this.source = source;
 		this.sink = sink;
-		// if a dataflow result doesn't have a score, then it should not get the best score
-		this.priorityScore = Integer.MAX_VALUE;
+		this.prioMetrics = new HashMap<>();
 	}
 
 	public DataFlowResult(ResultSourceInfo source, ResultSinkInfo sink, IInfoflowCFG iCfg) {
 		this.source = source;
 		this.sink = sink;
+		this.prioMetrics = new HashMap<>();
 		computeDataFlowInfo(iCfg);
 	}
 
@@ -52,8 +53,8 @@ public class DataFlowResult {
 		return sink;
 	}
 
-	public float getPriorityScore() {
-		return priorityScore;
+	public HashMap<String, Float> getPrioMetrics() {
+		return prioMetrics;
 	}
 
 	public int getPathLength() {
@@ -83,7 +84,7 @@ public class DataFlowResult {
 		}
 	}
 
-	// Compute the following fields: pathLength, numClasses, numMethods, implicitFactor and priorityScore
+	// Compute the following fields: pathLength, numClasses, numMethods, implicitFactor and prioMetrics
 	private void computeDataFlowInfo(IInfoflowCFG iCfg) {
 		Set<String> methods = new HashSet<>();
 		Set<String> classes = new HashSet<>();
@@ -105,7 +106,21 @@ public class DataFlowResult {
 		numMethods = methods.size();
 		numClasses = classes.size();
 
-		priorityScore = pathLength + numMethods + numClasses + implicitFactor;
+		float prioMetricA = pathLength + numMethods + numClasses + implicitFactor;
+		float prioMetricB = numMethods + implicitFactor;
+		float prioMetricC = (pathLength + implicitFactor) / numMethods;
+		float prioMetricD = (pathLength + numMethods + implicitFactor) / numClasses;
+		float prioMetricE = pathLength;
+		float prioMetricF = numMethods;
+		float prioMetricG = ((float) numMethods) / numClasses;
+
+		prioMetrics.put("a", prioMetricA);
+		prioMetrics.put("b", prioMetricB);
+		prioMetrics.put("c", prioMetricC);
+		prioMetrics.put("d", prioMetricD);
+		prioMetrics.put("e", prioMetricE);
+		prioMetrics.put("f", prioMetricF);
+		prioMetrics.put("g", prioMetricG);
 	}
 
 	/**

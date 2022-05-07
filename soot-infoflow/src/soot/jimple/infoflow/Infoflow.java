@@ -11,13 +11,7 @@ package soot.jimple.infoflow;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -750,11 +744,15 @@ public class Infoflow extends AbstractInfoflow {
 			for (DataFlowResult dataflow : results.getPrioritizedResults(iCfg)) {
 				ResultSinkInfo sink = dataflow.getSink();
 				ResultSourceInfo source = dataflow.getSource();
+				HashMap<String, Float> prioMetrics = dataflow.getPrioMetrics();
 
-				logger.info("{}) priority score: {}, # unique classes: {}, # unique methods: {}, " +
+				logger.info("{}) # unique classes: {}, # unique methods: {}, " +
 								"path length: {}, implicit factor: {}",
-						(index++), dataflow.getPriorityScore(), dataflow.getNumClasses(),
+						(index++), dataflow.getNumClasses(),
 						dataflow.getNumMethods(), dataflow.getPathLength(), dataflow.getImplicitFactor());
+				logger.info("prioritization metrics) A: {}, B: {}, C: {}, D: {}, E: {}, F:{}, G{}",
+						prioMetrics.get("a"), prioMetrics.get("b"), prioMetrics.get("c"),
+						prioMetrics.get("d"), prioMetrics.get("e"), prioMetrics.get("f"), prioMetrics.get("g"));
 				logger.info("The sink {} in method {} was called with values from the following source:",
 						sink, iCfg.getMethodOf(sink.getStmt()).getSignature());
 				logger.info("- {} in method {}", source, iCfg.getMethodOf(source.getStmt()).getSignature());
